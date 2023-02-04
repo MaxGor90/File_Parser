@@ -4,7 +4,6 @@
 
 
 void File::Open(write_read mode, const std::string& path)
-    
 {   
     Mode = mode;
     

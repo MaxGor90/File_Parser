@@ -9,7 +9,7 @@ file(GLOB_RECURSE SOURCES CMAKE_CONFIGURE_DEPENDS RELATIVE ${CMAKE_SOURCE_DIR} "
 add_executable(File_Parser ${SOURCES})
 
 target_compile_features(File_Parser PUBLIC cxx_std_17)
-target_compile_options(File_Parser PUBLIC -Wall -Wextra -Wpedantic)
+target_compile_options(File_Parser PUBLIC -Wall -Wextra -Wpedantic -ggdb)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

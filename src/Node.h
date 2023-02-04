@@ -9,15 +9,15 @@
 class Node
 {
 public:
-    using Node_Ptr = std::shared_ptr<Node>;
+    using Node_Ptr = std::unique_ptr<Node>;
     
-    Node (unsigned int id, const std::string& name, Node_Ptr parent = nullptr);
+    Node (unsigned int id, const std::string& name, Node* parent = nullptr);
     virtual ~Node() {}
 
 protected:    
     unsigned int Id;
     std::string Name;
-    Node_Ptr Parent {nullptr};
+    Node* Parent {nullptr};
     unsigned int Level{0};
 
 public:
@@ -33,16 +33,18 @@ public:
 // Node with value
 class ValueNode : public Node
 {
+    std::string Value;
+
 public:
-    ValueNode(unsigned int id, const std::string& name, Node_Ptr parent = nullptr) :
+    ValueNode(unsigned int id, const std::string& name, Node* parent = nullptr) :
         Node(id, name, parent)
     {}
-    std::string Value;
+    ~ValueNode() {}
+
     void addChild(Node_Ptr node) override;
     void setValue(const std::string& value) override { Value = value; };
     std::string getValue() const override { return Value; };
     void print(std::ofstream& out) override;
-
 };
 
 // Node with list of children
@@ -51,11 +53,12 @@ class ListNode : public Node
     std::vector<Node_Ptr> Children;
 
 public:
-    ListNode(unsigned int id, const std::string& name, Node_Ptr parent = nullptr) :
+    ListNode(unsigned int id, const std::string& name, Node* parent = nullptr) :
         Node(id, name, parent)
     {}
-
-    void addChild(Node_Ptr node) override { Children.push_back(node); };
+    ~ListNode() {}
+    
+    void addChild(Node_Ptr node) override { Children.push_back(std::move(node)); };
     void setValue(const std::string& value) override;
     std::string getValue() const override;
     void print(std::ofstream& out) override;

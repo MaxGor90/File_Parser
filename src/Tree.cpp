@@ -18,6 +18,7 @@ void Tree::Deserialize(File* file)
     }
     catch(const std::string& exception) {
         throw exception;
+        file->in_file.close();
         return;
     }
     
@@ -37,9 +38,12 @@ void Tree::Deserialize(File* file)
         if (!check.empty())
         {
             throw std::string("Invalid data format");
+            file->in_file.close();
             return;
         }
     }
+
+    file->in_file.close();
 }
 
 void Tree::Serialize(File* file) 
@@ -53,7 +57,7 @@ void Tree::Serialize(File* file)
     file->out_file.close();
 }
 
-Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node::Node_Ptr parent) 
+Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent) 
 {
     std::string str;
     std::getline(inStream, str);
@@ -112,13 +116,13 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node::Node_Ptr parent)
         }
 
         std::string Name {getName(str)};
-        std::shared_ptr<ListNode> node = std::shared_ptr<ListNode>(new ListNode(IdGenerator::generateId(), Name, parent));
+        std::unique_ptr<ListNode> node = std::make_unique<ListNode>(IdGenerator::generateId(), Name, parent);
         while (true)
         {
-            Node::Node_Ptr newNode { ParseNode(inStream, node)};
+            Node::Node_Ptr newNode { ParseNode(inStream, node.get())};
             if (newNode == nullptr)
                 break;
-            node->addChild(newNode);
+            node->addChild(std::move(newNode));
         }
         return node;
     }
@@ -135,12 +139,12 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node::Node_Ptr parent)
 }
 
 
-Node::Node_Ptr Tree::ParseValueNode(const std::string& str, Node::Node_Ptr parent) 
+Node::Node_Ptr Tree::ParseValueNode(const std::string& str, Node* parent) 
 {
     if (str.find('=') == std::string::npos)
         return nullptr;
     std::string Name = getName(str);
-    std::shared_ptr<ValueNode> node = std::shared_ptr<ValueNode>(new ValueNode(IdGenerator::generateId(), Name, parent));
+    std::unique_ptr<ValueNode> node = std::make_unique<ValueNode>(IdGenerator::generateId(), Name, parent);
     std::string value;
     
     try {
@@ -155,10 +159,10 @@ Node::Node_Ptr Tree::ParseValueNode(const std::string& str, Node::Node_Ptr paren
     return node;
 }
 
-Node::Node_Ptr Tree::ParseListNode(const std::string& str, Node::Node_Ptr parent) 
+Node::Node_Ptr Tree::ParseListNode(const std::string& str, Node* parent) 
 {
     std::string Name = getName(str);
-    std::shared_ptr<ListNode> node = std::shared_ptr<ListNode>(new ListNode(IdGenerator::generateId(), Name, parent));
+    std::unique_ptr<ListNode> node = std::make_unique<ListNode>(IdGenerator::generateId(), Name, parent);
     std::string list {str.substr(str.find('{') +1, 
                                  str.find('}') - str.find('{') -1)};
     
@@ -171,10 +175,10 @@ Node::Node_Ptr Tree::ParseListNode(const std::string& str, Node::Node_Ptr parent
     
     while (true)
     {
-        Node::Node_Ptr newNode = ParseValueNode(list, node);
+        Node::Node_Ptr newNode = ParseValueNode(list, node.get());
         if (newNode == nullptr)
             break;
-        node->addChild(newNode);
+        node->addChild(std::move(newNode));
         list = list.substr(list.find('\"') +1);
         list = list.substr(list.find('\"') +1);
         if (list.empty())

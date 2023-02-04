@@ -3,7 +3,7 @@
 #include <sstream>
 
 
-Node::Node(unsigned int id, const std::string& name, Node_Ptr parent): 
+Node::Node(unsigned int id, const std::string& name, Node* parent): 
     Id {id}, Name {name}, Parent {parent}
 {
     if (Parent)
@@ -36,14 +36,14 @@ void ListNode::print(std::ofstream& out)
     sStream << Id << ", " 
             << ((Parent == nullptr)? 0 : Parent->getId()) << ", "
             << Name;
-    for (auto child : Children)
+    for (auto& child : Children)
         sStream << ", " << child->getId();
     
     sStream << ')';
     std::string str {sStream.str()};
     out << str << std::endl;
 
-    for (auto child : Children)
+    for (auto& child : Children)
         child->print(out);
 }
 
