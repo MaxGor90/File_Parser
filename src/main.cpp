@@ -40,7 +40,7 @@ int main(int argc, char* args[])
     }
     
     try {
-        file->Reopen(File::READ, InFile);
+        file->Reopen(File::WRITE, OutFile);
     } catch (const std::string& except)
     {
         std::cerr << except;
