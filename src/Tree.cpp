@@ -67,15 +67,14 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent)
     
     // Закрывающая лист скобка - первый значимый символ
     if (str.substr(0,1) == "}")
-        return nullptr;
-        
-    // Скобка, закрывающая лист, содержащий другой лист, не на новой строке - нарушение формата
-    if (str.find("}}") != std::string::npos)
     {
+        // Две закрывающие лист скобки на одной строке - нарушение формата
+        if ( (str.substr(str.find('}') +1)).find('}') == std::string::npos)
+            return nullptr;
         throw std::string("Invalid data format");
         return nullptr;
     }
-
+        
     // На строке, не содержащей первым значимым символом закрывающую лист скобку, нет "=" - нарушение формата
     if (str.find('=') == std::string::npos)
     {
@@ -98,7 +97,12 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent)
         // Лист описан одной строкой
         if (str.find('}') != std::string::npos)
         {
-            return ParseListNode(str, parent);
+            // Две закрывающие лист скобки на одной строке - нарушение формата
+            if ( (str.substr(str.find('}') +1)).find('}') == std::string::npos)
+                return ParseListNode(str, parent);
+            
+            throw std::string("Invalid data format");
+            return nullptr;
         }
         
         // Лист не описан одной строкой, но после '{' есть значимые символы - нарушение формата
