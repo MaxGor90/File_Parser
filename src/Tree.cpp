@@ -84,7 +84,7 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent)
 
     std::string Type = str.substr(str.find('=') +1);
     
-    // Допустим возможность отсутствия пробелов вокруг "=", не рассчитываем на наличие прорбела
+    // Допустим возможность отсутствия пробелов вокруг "=", не рассчитываем на наличие пробела
     trim(Type);
     
     Type = Type.substr(0, 1);
