@@ -18,6 +18,7 @@ public:
     Node::Node_Ptr ParseValueNode(const std::string& str, Node* parent = nullptr);
     Node::Node_Ptr ParseListNode(const std::string& str, Node* parent = nullptr);
     std::string getName(const std::string& string);
+    void checkName(const std::string& name);
     std::string getValue(const std::string& string);
     static inline void trim(std::string& string);
 };

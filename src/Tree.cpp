@@ -68,10 +68,14 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent)
     // Закрывающая лист скобка - первый значимый символ
     if (str.substr(0,1) == "}")
     {
-        // Две закрывающие лист скобки на одной строке - нарушение формата
-        if ( (str.substr(str.find('}') +1)).find('}') == std::string::npos)
-            return nullptr;
-        throw std::string("Invalid data format");
+        std::string check {str.substr(str.find('}') +1)};
+        trim(check);
+        
+        // После закрывающей лист скобки в строке имеются видимые символы - нарушение формата
+        if (!check.empty())
+        {
+            throw std::string("Invalid data format");
+        }
         return nullptr;
     }
         
@@ -97,12 +101,16 @@ Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent)
         // Лист описан одной строкой
         if (str.find('}') != std::string::npos)
         {
-            // Две закрывающие лист скобки на одной строке - нарушение формата
-            if ( (str.substr(str.find('}') +1)).find('}') == std::string::npos)
-                return ParseListNode(str, parent);
+            std::string check {str.substr(str.find('}') +1)};
+            trim(check);
             
-            throw std::string("Invalid data format");
-            return nullptr;
+            // После закрывающей лист скобки в строке имеются видимые символы - нарушение формата
+            if (!check.empty())
+            {
+                throw std::string("Invalid data format");
+                return nullptr;
+            }
+            return ParseListNode(str, parent);
         }
         
         // Лист не описан одной строкой, но после '{' есть значимые символы - нарушение формата
@@ -212,7 +220,16 @@ std::string Tree::getValue(const std::string& string)
         return "";
     }
     value = value.substr(0, value.find('\"'));
-
+    
+    // Значение узла пустое либо содержит только пробелы
+    std::string check {value};
+    trim(check);
+    if (check.empty())
+    {
+        throw std::string("Invalid data format");
+        return "";
+    }
+    
     return value; 
 }
 
@@ -237,16 +254,38 @@ std::string Tree::getName(const std::string& string)
 
     trim(name);
     
+    try { 
+        checkName(name); 
+    }
+    catch (const std::string& except)
+    {
+        throw except;
+        return "";
+    }
+    
+    return name;
+}
+
+void Tree::checkName(const std::string& name)
+{
     // Имя пустое, начинается с цифры, либо содержит пробел - нарушение формата
     if ( name.empty()                               || 
         ((int)name[0] >= 48 && (int)name[0] <= 57)  ||
         (name.find(' ') != std::string::npos) )
     {
         throw std::string("Invalid data format");
-        return "";
+        return;
     }
 
-    return name;
+    // Имя содержит нехарактерные для названий символы: {}|\/+=-()?! и тд
+    for (char ch : name)
+    {
+        if ( (int)ch < 48 ||
+             ((int)ch > 57 && (int)ch < 65) || 
+             ((int)ch > 90 && (int)ch < 95) || 
+             (int)ch == 96 || (int)ch > 122 
+            )
+            throw std::string("Invalid data format");
+            return;
+    }
 }
-
-
