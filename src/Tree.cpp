@@ -235,10 +235,14 @@ std::string Tree::getValue(const std::string& string)
 
 void Tree::trim(std::string& string) 
 {
-    while (string[0]==' ')
+    while ( string[0]==' ' || 
+            string[0]=='\r' || 
+            string[0]=='\t')
         string.erase(string.begin(), string.begin() +1);
 
-    while (string[string.size() -1] == ' ')
+    while ( string[string.size() -1] == ' ' || 
+            string[string.size() -1] == '\r' ||
+            string[string.size() -1] == '\t')
         string.erase(string.end() -1, string.end());
 }
 
@@ -285,7 +289,9 @@ void Tree::checkName(const std::string& name)
              ((int)ch > 90 && (int)ch < 95) || 
              (int)ch == 96 || (int)ch > 122 
             )
+        {
             throw std::string("Invalid data format");
             return;
+        }
     }
 }
