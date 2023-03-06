@@ -3,6 +3,7 @@
 #include "IdGenerator.h"
 #include "File.h"
 #include "Tree.h"
+#include "DB.h"
 
 unsigned int IdGenerator::Id {0};
 
@@ -10,6 +11,8 @@ unsigned int IdGenerator::Id {0};
 
 int main(int argc, char* args[])
 {
+    setlocale(LC_ALL, "Russian");
+
     if (argc < 3)
     {
         std::cerr << "Invalid argument input. Enter Input file as 1st arg, Output file as 2nd arg.\n";
@@ -49,5 +52,44 @@ int main(int argc, char* args[])
     tree->Serialize(file.get());
 
     std::cout << "Serialization completed successfully\n";
+
+    try {
+        DB db("host=localhost port=5432 dbname=learn user=postgres");
+
+        db.work->exec0("DROP TABLE IF EXISTS public.shape_params;");
+        db.work->exec0(
+        "CREATE TABLE shape_params ("
+            "id int PRIMARY KEY, "
+            "parent_id int references shape_params(id), "
+            "name text, "
+            "value text );"
+        );
+
+        tree->WriteToDB(&db);
+
+        std::string q{
+            "select s2.id, s2.name, s1.id as Par_ID, s1.name as Par_Name  FROM shape_params as s1 "
+            "RIGHT JOIN shape_params as s2 "
+                "ON s2.parent_id = s1.id "
+            "WHERE s1.name = 'vertices';"
+        };
+        pqxx::result res {db.work->exec(q)};
+
+        for (auto row : res)
+        {
+            for (auto col : row)
+            {
+                std::cout << ' ' << col;
+            }
+            std::cout << std::endl;
+        }
+
+    } catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+
+
     return 0;
 }

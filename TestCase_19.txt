@@ -1,0 +1,6 @@
+shape = {
+type = "tetrahedron"
+vertices = {
+}
+color = { r = "0xFF" g = "0x00" b = "0x80" alpha = "0x80" }
+}

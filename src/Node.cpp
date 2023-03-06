@@ -1,6 +1,7 @@
 #include "Node.h"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 
 Node::Node(unsigned int id, const std::string& name, Node* parent): 
@@ -27,6 +28,20 @@ void ValueNode::print(std::ofstream& out)
     out << str << std::endl;
 }
 
+void ValueNode::writeToDB(DB* db)
+{
+    std::stringstream sStream;
+    sStream << '(' << Id << ',' << Parent->getId() << ",\'" << Name << "\',\'" << Value << "\')";
+    try {
+        db->work->exec0(
+            "INSERT INTO shape_params(id, parent_id, name, value) VALUES " + sStream.str() + ';' );
+    } catch (const std::exception& e)
+    {
+        std::cerr << e.what();
+        return;
+    }
+}
+
 void ListNode::print(std::ofstream& out)
 {
     std::stringstream sStream;
@@ -45,6 +60,27 @@ void ListNode::print(std::ofstream& out)
 
     for (auto& child : Children)
         child->print(out);
+}
+
+void ListNode::writeToDB(DB* db)
+{
+    std::stringstream sStream;
+
+    sStream << '(' << Id << ',';
+    if (Parent)
+        sStream << Parent->getId();
+    else sStream << "NULL";
+    sStream << ",\'" << Name << "\'," << "NULL" << ')';
+    try {
+        db->work->exec0(
+            "INSERT INTO shape_params(id, parent_id, name, value) VALUES " + sStream.str() + ';' );
+    } catch (const std::exception& e)
+    {
+        std::cerr << e.what();
+        return;
+    }
+    for (auto& child : Children)
+        child->writeToDB(db);
 }
 
 

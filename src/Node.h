@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "DB.h"
 
 
 class Node
@@ -27,6 +28,8 @@ public:
     virtual void setValue(const std::string& value) = 0;
     virtual std::string getValue() const = 0;
     virtual void print(std::ofstream& out) = 0;
+    virtual void writeToDB(DB* db) = 0;
+
 
 };
 
@@ -45,6 +48,7 @@ public:
     void setValue(const std::string& value) override { Value = value; };
     std::string getValue() const override { return Value; };
     void print(std::ofstream& out) override;
+    virtual void writeToDB(DB* db) override;
 };
 
 // Node with list of children
@@ -62,6 +66,8 @@ public:
     void setValue(const std::string& value) override;
     std::string getValue() const override;
     void print(std::ofstream& out) override;
+    virtual void writeToDB(DB* db) override;
+
 };
 
 

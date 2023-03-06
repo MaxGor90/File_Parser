@@ -57,6 +57,11 @@ void Tree::Serialize(File* file)
     file->out_file.close();
 }
 
+void Tree::WriteToDB(DB* db) 
+{
+    Root->writeToDB(db);
+}
+
 Node::Node_Ptr Tree::ParseNode(std::ifstream& inStream, Node* parent) 
 {
     std::string str;
